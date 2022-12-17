@@ -120,10 +120,7 @@ pipeline {
   }
   post {
     always {
-      sh """
-        docker rm -f test-client
-        docker image rm test-app
-      """
+      sh "docker rm -f test-client"
       script {
         if (isRelease) {
           sh "docker image rm devtube.azurecr.io/devtube-app:${newVersion}"
