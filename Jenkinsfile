@@ -54,7 +54,7 @@ pipeline {
             echo "Start Build Stage"
             sh """
               docker build -t test-app .
-              docker run --name test-client -p 3000:3000 -t test-app
+              docker run --name test-client -p 3000:3000 -d test-app
             """
           }
         }
@@ -123,8 +123,12 @@ pipeline {
       sh """
         docker rm -f test-client
         docker image rm test-app
-        docker image rm devtube.azurecr.io/devtube-app:${newVersion}
       """
+      script {
+        if (isRelease) {
+          sh "docker image rm devtube.azurecr.io/devtube-app:${newVersion}"
+        }
+      }
     }
   }
 }
