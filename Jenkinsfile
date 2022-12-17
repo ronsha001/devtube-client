@@ -106,7 +106,7 @@ pipeline {
                 echo "Update chart with new app image tag: ${newVersion}"
                 dir("devtube-chart/devtube") {
                   sh """
-                    yq \'(.app.image_tag = \"${newVersion}\" )\' values.yaml | sponge values.yaml
+                    yq \'(.client.image_tag = \"${newVersion}\" )\' values.yaml | sponge values.yaml
                     git commit -am \"jenkins-app-update, version: ${newVersion}\"
                     git push origin master
                   """
