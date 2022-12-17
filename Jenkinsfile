@@ -50,6 +50,9 @@ pipeline {
     stage ("Build") {
       steps {
         script {
+          if (isRelease) {
+            sh "jq \'.proxy = \"devtube-api.devtube-api-svc:5000/api/\"\' package.json | sponge package.json "
+          }
           if (isRelease || isFeature) {
             echo "Start Build Stage"
             sh """
