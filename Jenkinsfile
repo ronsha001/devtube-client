@@ -74,7 +74,7 @@ pipeline {
             }
           }
         }
-      }
+      // }
     }
     stage ("Publish") {
       steps {
