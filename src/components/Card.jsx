@@ -33,6 +33,7 @@ const Details = styled.div`
 const ChannelImage = styled.img`
   min-width: 36px;
   max-height: 36px;
+  max-width: 36px;
   border-radius: 50%;
   background-color: #999;
   display: ${(props) => props.type === "sm" && "none"}; ;
