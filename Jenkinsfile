@@ -70,11 +70,11 @@ pipeline {
           if (isRelease || isFeature) {
             dir('tests') {
               sh "wget --tries=10 --waitretry=5 --retry-connrefused --retry-on-http-error=502 -O- http://localhost:3000"
-              sh 'python3 test.py'
+              sh 'python3 tet.py'
             }
           }
         }
-      // }
+      }
     }
     stage ("Publish") {
       steps {
