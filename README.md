@@ -18,7 +18,12 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## Description
 DevTube is a Youtube frontend replica that I have developed with React.js framework.
 This app uses Google Firebase Storage to store all the images and videos that have been uploaded by users,
-it is also uses Google Firebase Authentication. There are 2 possible ways to sign up - with google and with email. DevTube allows you to signup, signin, upload new videos, view others videos, like and comment videos, and read others comments.
+it is also uses Google Firebase Authentication.
+There are 2 possible ways to sign up:
+- Google - will ask you to choose your Google-Account you want to continue with.
+- Email - Will ask you to fill 3 inputs - Username, Email, and Password.
+
+DevTube allows you to signup, signin, upload new videos, view others videos, like and comment videos, and read others comments.
 Once you have uploaded a video, the video can be editted by changing its Title, Description, and Hashtags. **Note: changing the video itself or its image is  `NOT` possible!**
 DevTube also allows you to edit your own profile information.
 
