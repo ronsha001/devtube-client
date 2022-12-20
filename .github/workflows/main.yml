@@ -34,10 +34,15 @@ jobs:
           echo "VERSION:  $VERSION"
           echo "NEW_TAG:  $NEW_TAG"
           echo "NEW_VERSION:  $NEW_VERSION"
+          
+      - name: Pre Build
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          sudo apt-get install moreutils
+          jq '.proxy = "http://devtube-api-svc:5000/api/"' package.json | sponge package.json
 
       - name: Build
         run: |
-          jq e -i '.proxy = "http://devtube-api-svc:5000/api/"' package.json
           cat package.json
           docker build -t test-app .
           docker run --name test-client -p 3000:3000 -d test-app
