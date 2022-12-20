@@ -34,7 +34,7 @@ jobs:
           echo "VERSION:  $VERSION"
           echo "NEW_TAG:  $NEW_TAG"
           echo "NEW_VERSION:  $NEW_VERSION"
-          
+
       - name: Pre Build
         if: startsWith(github.ref, 'refs/heads/release/')
         run: |
@@ -55,6 +55,7 @@ jobs:
           popd
       
       - name: Login into registry
+        if: startsWith(github.ref, 'refs/heads/release/')
         uses: docker/login-action@v1
         with:
           registry: ${{ secrets.ACR_ENDPOINT }}
