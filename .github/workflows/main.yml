@@ -1,0 +1,85 @@
+name: Build and Deploy Docker Image
+
+on:
+  push:
+    branches:
+      - release/*
+      - feature/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the code
+      - uses: actions/checkout@v2
+
+      # Extract the latest tag and increase it by 1
+      - name: Generate patch tag
+        id: tag
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          BRANCH_PARTS=($(echo "$GITHUB_REF" | tr '/' ' '))
+          VERSION=${BRANCH_PARTS[3]}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+          git fetch --all --tags
+
+          NEW_TAG=$(($(git tag | grep ^$VERSION | sort --version-sort | tail -1 | cut -d '.' -f 3) + 1))
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+
+
+          NEW_VERSION="${VERSION}.${NEW_TAG}"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          echo "VERSION:  $VERSION"
+          echo "NEW_TAG:  $NEW_TAG"
+          echo "NEW_VERSION:  $NEW_VERSION"
+
+      - name: Build
+        run: |
+          jq e -i '.proxy = "http://devtube-api-svc:5000/api/"' package.json
+          cat package.json
+          docker build -t test-app .
+          docker run --name test-client -p 3000:3000 -d test-app
+
+      - name: Tests
+        run: |
+          wget --tries=10 --waitretry=5 --retry-connrefused --retry-on-http-error=502 -O- http://localhost:3000
+          pushd tests
+            python3 test.py
+          popd
+      
+      - name: Login into registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.ACR_ENDPOINT }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Publish To ACR
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          docker tag test-app ${{ secrets.ACR_ENDPOINT }}/devtube-app:${{ steps.tag.outputs.NEW_VERSION }}
+          docker push ${{ secrets.ACR_ENDPOINT }}/devtube-app:${{ steps.tag.outputs.NEW_VERSION }}
+
+      - name: Publish new tag
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          git checkout release/${{ steps.tag.outputs.VERSION }}
+          git clean -f
+          git tag ${{ steps.tag.outputs.NEW_VERSION }}
+          git push --tags
+
+      - name: Publish to devtube-chart
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          git clone https://${{ secrets.USERNAME }}:${{ secrets.TOKEN }}@github.com/ronsha001/devtube-chart.git
+          echo "Update chart with new app image tag: ${{ steps.tag.outputs.NEW_VERSION }}"
+          git config --global user.email "you@example.com"
+          git config --global user.name "IamGithubActions"
+          pushd devtube-chart/devtube
+            yq e -i '(.client.image_tag = "${{ steps.tag.outputs.NEW_VERSION }}")' values.yaml
+            git commit -am "Github-Actions-app-update, version: ${newVersion}"
+            git push origin master
+          popd
+

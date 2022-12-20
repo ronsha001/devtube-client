@@ -52,4 +52,4 @@ You may also see any lint errors in the console.
 Creates a docker image of DevTube's Frontend Application
 
 ### `docker-compose up`
-Will build DevTube's Frontend Application image and run it on docker container exposed to port 3000.
+Will build DevTube's Frontend Application image and run it on a docker container exposed to port 3000.
