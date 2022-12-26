@@ -9,3 +9,4 @@ def homePageTest():
 data = homePageTest()
 if not data.content:
   raise Exception("Something went wrong.")
+  
